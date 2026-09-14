@@ -21,7 +21,7 @@ jobs:
         oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
         tags: tag:ci
-    - name: SSH Remote Commands
+    - name: Clear previous build on server
       uses: appleboy/ssh-action@v1.2.5
       with:
         host: ${{ secrets.HOST }}
@@ -29,11 +29,28 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT || 22 }}
         timeout: 60s
-        command_timeout: 15m
+        script: rm -rf brainbot/build
+    - name: Copy build artifacts to server
+      uses: appleboy/scp-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT || 22 }}
+        timeout: 60s
+        source: build/,package.json,package-lock.json,ecosystem.config.cjs
+        target: brainbot
+    - name: Install production dependencies and reload
+      uses: appleboy/ssh-action@v1.2.5
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT || 22 }}
+        timeout: 60s
+        command_timeout: 10m
         script: |
           set -e
           cd brainbot
-          git pull
-          npm ci
-          npm run build
-          pm2 update
+          npm ci --omit=dev
+          pm2 startOrReload ecosystem.config.cjs --update-env
