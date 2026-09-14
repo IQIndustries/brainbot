@@ -16,12 +16,16 @@ jobs:
     - name: Build
       run: npm run build
     - name: SSH Remote Commands
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@v1.2.5
       with:
-        HOST: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.USERNAME }}
-        KEY: ${{ secrets.KEY }}
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT || 22 }}
+        timeout: 60s
+        command_timeout: 15m
         script: |
+          set -e
           cd brainbot
           git pull
           npm ci
