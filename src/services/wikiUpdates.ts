@@ -445,9 +445,9 @@ export default class WikiUpdates {
   }
 
   async startApiHealthMonitoring(): Promise<void> {
-    const checkInterval = 120000 // 2 minutes
+    const checkInterval = 300000 // 5 minutes
 
-    console.log('🔍 Starting API Health Monitoring - checking every 2 minutes')
+    console.log('🔍 Starting API Health Monitoring - checking every 5 minutes')
 
     this.apiHealthStatus.set(ChannelTypes.DEV, {
       isHealthy: true,
